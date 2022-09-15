@@ -14,6 +14,7 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.27.2",
+    "bcrypt": "^5.0.1",
     "connect-mongo": "^4.6.0",
     "cross-env": "^7.0.3",
     "dotenv": "^16.0.1",
@@ -24,7 +25,9 @@
     "express-session": "^1.17.3",
     "mongodb": "^4.8.1",
     "mongoose": "^6.5.2",
-    "noty": "^3.2.0-beta-deprecated"
+    "noty": "^3.2.0-beta-deprecated",
+    "passport": "^0.6.0",
+    "passport-local": "^1.0.0"
   },
   "devDependencies": {
     "laravel-mix": "^6.0.49",
