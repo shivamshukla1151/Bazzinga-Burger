@@ -10,6 +10,8 @@ const session = require('express-session')
 const flash = require('express-flash')
 const MongoDbStore = require('connect-mongo')
 const passport = require('passport')
+const favicon = require('serve-favicon')
+const Emitter = require('events')
 
 //Database connection
 const url = 'mongodb://localhost:27017/Bazzinga';
@@ -24,8 +26,11 @@ connection.once('open', () => {
 //     mongooseConnection: connection,
 //     collection: 'sessions'
 // })
-
+// Event emitter
 //session config
+const eventEmitter = new Emitter()
+app.set('eventEmitter', eventEmitter)
+
 app.use(session({
     secret: process.env.COOKIE_SECRET,
     resave: false,
@@ -38,6 +43,7 @@ app.use(session({
 
 //Passport congfig
 const passportInit = require('./app/config/passport')
+const { dirname } = require('path')
 passportInit(passport)
 app.use(passport.initialize())
 app.use(passport.session())
@@ -60,13 +66,34 @@ app.use((req,res,next)=>{
 app.use(expressLayout)
 app.set('views', path.join(__dirname, '/resources/views'))
 app.set('view engine', 'ejs')
+//app.use(favicon(path.join(__dirname,'/public/img/logo.png')))
 
 
 require('./routes/web')(app)
 
 
 
-app.listen(PORT , () => {
+const server = app.listen(PORT , () => {
     console.log(`listening on port ${PORT}`)
 })
 
+//Socket
+
+const io = require('socket.io')(server)
+
+io.on('connection',(socket)=>{
+       //Join 
+       
+       socket.on('join', (orderId) =>{
+         socket.join(orderId)
+       })
+
+})
+
+eventEmitter.on('orderUpdated', (data) => {
+    //console.log('data')
+    io.to(`order_${data.id}`).emit('orderUpdated', data)
+})
+eventEmitter.on('orderPlaced', (data) => {
+    io.to('adminRoom').emit('orderPlaced', data)
+})
